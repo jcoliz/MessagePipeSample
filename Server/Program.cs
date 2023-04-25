@@ -16,7 +16,17 @@ IHost host = Host.CreateDefaultBuilder(args)
     })
     .Build();
 
-// See https://github.com/Cysharp/MessagePipe/issues/99
-using var namedPipeWorker = host.Services.GetRequiredService<NamedPipeWorker>(); 
-
-host.Run();
+try
+{
+    // See https://github.com/Cysharp/MessagePipe/issues/99
+    using var namedPipeWorker = host.Services.GetRequiredService<NamedPipeWorker>();
+    host.Run();
+}
+catch (System.ObjectDisposedException)
+{
+    // This is expected due to the workaround above
+}
+catch (Exception ex)
+{
+    Console.WriteLine($"ERROR {ex.GetType()} {ex.Message}");
+}
