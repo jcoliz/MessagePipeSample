@@ -17,7 +17,9 @@ public class Worker : BackgroundService
     {
         while (!stoppingToken.IsCancellationRequested)
         {
-            var result = await _remoteHandler.InvokeAsync(1234);
+            int request = DateTimeOffset.Now.Millisecond;
+            _logger.LogInformation("Sending: {request}", request);
+            var result = await _remoteHandler.InvokeAsync(request);
             _logger.LogInformation("Received: {result}", result);
             await Task.Delay(1000, stoppingToken);
         }

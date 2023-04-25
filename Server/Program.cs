@@ -1,4 +1,5 @@
 using MessagePipe;
+using MessagePipe.Interprocess.Workers;
 using Server;
 
 IHost host = Host.CreateDefaultBuilder(args)
@@ -6,9 +7,17 @@ IHost host = Host.CreateDefaultBuilder(args)
     {
         services.AddHostedService<Worker>();
         services.AddMessagePipe();
-        services.AddMessagePipeNamedPipeInterprocess("sample-pipe");
+        services.AddMessagePipeNamedPipeInterprocess("sample-pipe", config => 
+		{	
+			config.InstanceLifetime = InstanceLifetime.Singleton;
+			config.HostAsServer = true; // Should be true for server side.
+		});
+        services.AddSingleton<IAsyncRequestHandler<int, string>, MyAsyncHandler>();
     })
     .Build();
+
+// See https://github.com/Cysharp/MessagePipe/issues/99
+using var namedPipeWorker = host.Services.GetRequiredService<NamedPipeWorker>(); 
 
 host.Run();
 
